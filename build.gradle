@@ -1,0 +1,27 @@
+plugins {
+    id 'java'
+    id 'application'
+}
+
+group 'at.platzer.train'
+version '1.0-SNAPSHOT'
+
+sourceCompatibility = 11
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    // https://mvnrepository.com/artifact/org.imgscalr/imgscalr-lib
+    compile group: 'org.imgscalr', name: 'imgscalr-lib', version: '4.2'
+
+    // https://mvnrepository.com/artifact/commons-io/commons-io
+    compile group: 'commons-io', name: 'commons-io', version: '2.6'
+
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+}
+
+application {
+    mainClassName = 'at.platzer.train.bulkthumbnailcreator.Main'
+}
