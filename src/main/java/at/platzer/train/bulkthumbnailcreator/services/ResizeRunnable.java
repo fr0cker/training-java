@@ -30,12 +30,12 @@ public class ResizeRunnable implements Runnable {
     @Override
     public void run() {
         try {
-            logger.Info("processing file: " + sourceFile);
+            //logger.Info("processing file: " + sourceFile);
 
             File inputFile = new File(sourceFile);
             BufferedImage image = ImageIO.read(inputFile);
 
-            logger.Debug(String.format("resizing file: " + inputFile.getName()));
+            //logger.Debug(String.format("resizing file: " + inputFile.getName()));
             BufferedImage thumbnail = Scalr.resize(image, Scalr.Method.QUALITY, 500, 500);
 
             String extension = FilenameUtils.getExtension(inputFile.getName());
@@ -44,7 +44,7 @@ public class ResizeRunnable implements Runnable {
             String targetFile = Paths.get(config.getTargetThumbnailFolderPath(), filename + ".thumb." + extension).toString();
 
             File thumbnailFile = new File(targetFile);
-            logger.Debug(String.format("writing file: " + targetFile));
+            //logger.Debug(String.format("writing file: " + targetFile));
             ImageIO.write(thumbnail, extension, thumbnailFile);
         } catch (IOException e) {
             logger.Error(String.format("could not resize: %s", sourceFile), e);

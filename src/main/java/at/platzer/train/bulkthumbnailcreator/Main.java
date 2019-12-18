@@ -15,6 +15,11 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class Main {
     public static void main(String[] args) throws IOException {
@@ -39,19 +44,18 @@ public class Main {
 
         long startTime = System.nanoTime();
 
-        Thread[] resizeThreads = new Thread[sourceImagePaths.length];
-        for(int i = 0; i < resizeThreads.length; i++) {
+        ExecutorService executor = Executors.newCachedThreadPool();
+        List<Callable<Object>> runnables = new ArrayList<>();
+
+        for(int i = 0; i < sourceImagePaths.length; i++) {
             String fullPath = Paths.get(sourcePath, sourceImagePaths[i]).toString();
-            resizeThreads[i] = new Thread(new ResizeRunnable(logger, config, fullPath));
-            resizeThreads[i].start();
+            runnables.add(Executors.callable(new ResizeRunnable(logger, config, fullPath)));
         }
 
-        for(int i = 0; i < resizeThreads.length; i++) {
-            try {
-                resizeThreads[i].join();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+        try {
+            executor.invokeAll(runnables);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
 
         long endTime = System.nanoTime();
