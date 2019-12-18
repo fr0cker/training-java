@@ -4,6 +4,8 @@ import at.platzer.train.bulkthumbnailcreator.api.Config;
 import at.platzer.train.bulkthumbnailcreator.api.Logger;
 import at.platzer.train.bulkthumbnailcreator.services.PrintLineLogger;
 import at.platzer.train.bulkthumbnailcreator.services.PropertiesConfig;
+import at.platzer.train.bulkthumbnailcreator.services.ResizeRunnable;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.imgscalr.Scalr;
 
@@ -16,6 +18,7 @@ import java.nio.file.Paths;
 
 public class Main {
     public static void main(String[] args) throws IOException {
+
         System.out.println("Starting thumbnail creator");
 
         Logger logger = new PrintLineLogger();
@@ -30,24 +33,25 @@ public class Main {
 
         File sourceFolder = new File(sourcePath);
 
+        FileUtils.cleanDirectory(new File(config.getTargetThumbnailFolderPath()));
+
         String[] sourceImagePaths = sourceFolder.list();
 
         long startTime = System.nanoTime();
 
-        for(String sourceImagePath : sourceImagePaths){
-            String fullPath = Paths.get(sourcePath, sourceImagePath).toString();
-            File inputFile = new File(fullPath);
+        Thread[] resizeThreads = new Thread[sourceImagePaths.length];
+        for(int i = 0; i < resizeThreads.length; i++) {
+            String fullPath = Paths.get(sourcePath, sourceImagePaths[i]).toString();
+            resizeThreads[i] = new Thread(new ResizeRunnable(logger, config, fullPath));
+            resizeThreads[i].start();
+        }
 
-            BufferedImage image = ImageIO.read(inputFile);
-
-            BufferedImage thumbnail = Scalr.resize(image, Scalr.Method.QUALITY, 500, 500);
-
-            String extension = FilenameUtils.getExtension(inputFile.getName());
-            String filename = FilenameUtils.getBaseName(inputFile.getName());
-
-            String targetFile = Paths.get(config.getTargetThumbnailFolderPath(), filename + ".thumb." + extension).toString();
-            File thumbnailFile = new File(targetFile);
-            ImageIO.write(thumbnail, extension, thumbnailFile);
+        for(int i = 0; i < resizeThreads.length; i++) {
+            try {
+                resizeThreads[i].join();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         }
 
         long endTime = System.nanoTime();

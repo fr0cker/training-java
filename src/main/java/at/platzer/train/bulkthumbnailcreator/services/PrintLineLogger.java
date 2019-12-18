@@ -28,12 +28,12 @@ public class PrintLineLogger implements Logger {
 
     @Override
     public void Info(String message, Exception ex) {
-        Write("DEBUG: ", message, ex);
+        Write("INFO: ", message, ex);
     }
 
     @Override
     public void Info(String message) {
-        Write("DEBUG: ", message, null);
+        Write("INFO: ", message, null);
     }
 
     @Override
